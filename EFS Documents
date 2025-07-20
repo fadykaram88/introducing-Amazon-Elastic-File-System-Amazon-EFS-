@@ -1,0 +1,62 @@
+project 4 
+introducing Amazon Elastic File System (Amazon EFS)
+First task : Creating a security group to access your EFS file system
+1 - write in the search VPC then choose ( your VPCs ) then Create VPC and I think that project 3 steps will help you to create new VPC 
+3 - after creating the Security group choose it and take Security group ID as a copy and write it in text editor as we will use it later 	
+4 - let's create other security group 
+Security group name : EFS Mount Target 
+Description : Inbound NFS access from EFS clients 
+VPC : the VPC you have created 
+5 -  in Inbound rules choose add rule 
+Type : NFS 
+Source : write the Security group ID you have pasted in the text editor 
+
+Task 2 : let's create EFS file system 
+6 - in the search write EFS then choose Create file System 
+7 - choose customize 
+8 - clear the option of Enable automatic backups 
+9 - in Lifecycle management , in Transition into infrequent access AI  select none 
+10 - in Tags Optional 
+Key : NAME
+Value : My First EFS File System
+Choose Next 
+11 - For VPC : choose the VPC you have created 
+12 - in the security group  remove the chosen options (default) and choose EFSClient 
+then choose next then next again then create 
+13 - Let's create EC2 instance 
+write in the search EC2 then launch instance 
+Name : EFS Client
+app and OS image : Amazon Linux AWS 2023 kernel-6.1 AMI 
+Instance type : t3.micro 
+Key pair (login) choose Create new kay pair 
+Kay pair name : Vockey 
+Key pair type : RSA then .Pem then Create key pair then choose it
+network setting choose edit
+VPC : the vpc you have created 
+Subnet : public Subnet you have created 
+Auto-assign public IP : enable 
+Security group : Select existing security group and choose only EFSClient 
+14 - launch instance 
+15 - choose the instance then choose connect then choose Session Manager then connect 
+
+Task 3 : Creating a new directory and mounting the EFS file system
+16 - write 
+sudo su -l ec2-user
+sudo yum install -y amazon-efs-utils
+sudo mkdir efs
+17 - don't close this page and search in the console about EFS and choose My First EFS File System  then choose Attach to open the Amazon EC2 mount instructions 
+you will find a point called Using the NFS client so take a copy of the written command  and it will be look like (sudo mount -t nfs4 -o nfsvers=4.1,rsize=1048576,wsize=1048576,hard,timeo=600,retrans=2,noresvport fs-0fd1858bf045e6358.efs.us-east-1.amazonaws.com:/ efs)
+then come back to the Session manager and run that command and wait until it finishes 
+17 - to know the full summary of available and used disk space usage write  
+sudo df -hT
+
+Final task ( TASK 4 ) : How to know the performance behavior of your new EFS file system ?
+18 - to know the performance , use Flexible IO in the CLI 
+Flex IO : is a synthetic I/O benchmarking utility for Linux. It is used to benchmark and test Linux I/O subsystems
+write this command in the CLI but wait few minutes 
+sudo fio --name=fio-efs --filesize=10G --filename=./efs/fio-efs-test.img --bs=1M --nrfiles=1 --direct=1 --sync=0 --rw=write --iodepth=200 --ioengine=libaio
+when it finishes you will see something like that 
+ 
+
+19 - I wish if I give you perfect info today 
+20 - goodbye and see you soon in other project
